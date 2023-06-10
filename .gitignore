@@ -17,5 +17,8 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+# program
+go-gqlgen-user-registration
+
 # Go workspace file
 go.work

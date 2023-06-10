@@ -9,6 +9,7 @@ type User {
 
 type Query {
   users: [User!]!
+  user(id:ID!): User
 }
 
 input NewUser {
@@ -18,6 +19,7 @@ input NewUser {
 
 type Mutation {
   registerUser(input: NewUser!): User!
+  upsertUser(input: NewUser!): User!
 }
 
 

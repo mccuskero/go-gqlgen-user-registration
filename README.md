@@ -9,6 +9,13 @@ To generate models run the following
 
 To register a new user in graphql playground
 
+1. execute the app
+./go-gqlgen-user-registration
+2023/06/10 14:27:53 connect to http://localhost:8080/ for GraphQL playground
+
+or connect with insomnia
+
+
 ```
 mutation registerUser {
 	registerUser(input: { userId: "1", name: "test"}) {
@@ -48,5 +55,28 @@ You will see output like:
 	}
 }
 ```
+
+To query a single user
+
+```
+query {
+	 user(id:1) {
+		id,
+		name
+	}
+}
+```
+
+To query multiple users
+
+```
+query {
+	 users {
+		id,
+		name
+	}
+}
+```
+
 
 

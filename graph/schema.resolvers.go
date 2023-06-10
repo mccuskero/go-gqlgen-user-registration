@@ -6,30 +6,99 @@ package graph
 
 import (
 	"context"
-	"crypto/rand"
 	"fmt"
-	"math/big"
 
 	"github.com/mccuskero/go-gqlgen-user-registration/graph/model"
 )
 
 // RegisterUser is the resolver for the registerUser field.
 func (r *mutationResolver) RegisterUser(ctx context.Context, input model.NewUser) (*model.User, error) {
-	rand, _ := rand.Int(rand.Reader, big.NewInt(100))
+	var user model.User
+	id := input.UserID
+	name := input.Name
 
-	user := &model.User{
-		ID:   input.UserID,
-		Name: fmt.Sprintf("User%d", rand),
+	numUsers := len(r.Resolver.UserStore)
+
+	if numUsers == 0 {
+		r.Resolver.UserStore = make(map[string]model.User)
 	}
 
-	r.users = append(r.users, user)
+	if len(id) > 0 && len(name) > 0 {
+		_, found := r.Resolver.UserStore[id]
 
-	return user, nil
+		if found {
+			return nil, fmt.Errorf("user ID already exists")
+		}
+
+		user.ID = id
+		user.Name = name
+
+		r.Resolver.UserStore[id] = user
+		return &user, nil
+	}
+
+	return nil, fmt.Errorf("either user ID, and/or username was empty")
+}
+
+// UpsertUser is the resolver for the upsertUser field.
+func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) (*model.User, error) {
+	var user model.User
+	id := input.UserID
+	name := input.Name
+
+	numUsers := len(r.Resolver.UserStore)
+
+	if numUsers == 0 {
+		r.Resolver.UserStore = make(map[string]model.User)
+	}
+
+	if len(id) > 0 && len(name) > 0 {
+		existingUser, ok := r.Resolver.UserStore[id]
+
+		if !ok {
+			user.ID = id
+			user.Name = name
+			r.Resolver.UserStore[id] = user
+			return &user, nil
+		}
+		existingUser.Name = name
+		r.Resolver.UserStore[id] = existingUser
+		return &existingUser, nil
+	}
+
+	return nil, fmt.Errorf("either user ID, and/or username was empty")
+}
+
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	if len(id) > 0 {
+		user, found := r.Resolver.UserStore[id]
+
+		if found {
+			return &user, nil
+		}
+	}
+
+	return nil, fmt.Errorf("user not found")
 }
 
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
-	return r.users, nil
+	numUsers := len(r.Resolver.UserStore)
+
+	if numUsers <= 0 {
+		return nil, fmt.Errorf("no users in user store")
+	}
+
+	users := make([]*model.User, 0)
+
+	for idx := range r.Resolver.UserStore {
+		user := r.Resolver.UserStore[idx]
+
+		users = append(users, &user)
+	}
+
+	return users, nil
 }
 
 // Mutation returns MutationResolver implementation.

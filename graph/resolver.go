@@ -8,7 +8,6 @@ import (
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
-type Resolver struct{
-	users []*model.User
+type Resolver struct {
+	UserStore map[string]model.User
 }
-
