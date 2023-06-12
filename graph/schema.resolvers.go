@@ -69,19 +69,6 @@ func (r *mutationResolver) UpsertUser(ctx context.Context, input model.NewUser) 
 	return nil, fmt.Errorf("either user ID, and/or username was empty")
 }
 
-// User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
-	if len(id) > 0 {
-		user, found := r.Resolver.UserStore[id]
-
-		if found {
-			return &user, nil
-		}
-	}
-
-	return nil, fmt.Errorf("user not found")
-}
-
 // Todos is the resolver for the todos field.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	numUsers := len(r.Resolver.UserStore)
@@ -99,6 +86,19 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	}
 
 	return users, nil
+}
+
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
+	if len(id) > 0 {
+		user, found := r.Resolver.UserStore[id]
+
+		if found {
+			return &user, nil
+		}
+	}
+
+	return nil, fmt.Errorf("user not found")
 }
 
 // Mutation returns MutationResolver implementation.
